@@ -145,7 +145,7 @@ var Router = Class.extend({
     getControllers: function( pathToControllersDir ) {
         var controllers = {};
         var controllerList = fs.readdirSync( pathToControllersDir );
-
+        
         for ( var i = 0, len = controllerList.length; i < len; i++ ) {
             var file = controllerList[ i ];
             if ( this.versioned ) {
@@ -166,7 +166,14 @@ var Router = Class.extend({
                             // a property named controller:version
                             // e.g. 'users:v0'
                             var controller = require( pathToControllersDir + '/' + version + '/' + file );
-                            controllers[ file.replace( /\.js$/, '' ) + ':' + version ] = typeof controller == 'function' ? new controller() : controller;
+
+                            if(controller.hasOwnProperty('default')) {
+                                
+
+                                controllers[ file.replace( /\.js$/, '' ) + ':' + version ] = controller.default;
+                            } else {
+                                controllers[ file.replace( /\.js$/, '' ) + ':' + version ] = typeof controller == 'function' ? new controller() : controller;
+                            }
                         }
                     }
 
@@ -176,7 +183,12 @@ var Router = Class.extend({
                 // add the controller to our lookup table of all controllers
                 if ( file.charAt(0) != '.' && file.match( /\.js$/ ) ) {
                     var controller = require( pathToControllersDir + '/' + file );
-                    controllers[ file.replace( /\.js$/, '' ) ] = typeof controller == 'function' ? new controller() : controller;
+                    if(controller.hasOwnProperty('default')) {
+
+                        controllers[ file.replace( /\.js$/, '' ) ] = controller.default;
+                    } else {
+                        controllers[ file.replace( /\.js$/, '' ) ] = typeof controller == 'function' ? new controller() : controller;
+                    }
                 }
             }
         }
